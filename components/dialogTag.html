@@ -1,0 +1,64 @@
+
+<script type="text/javascript">
+	
+	
+	snow.ui.registerComponent("dialogTag",{
+		ctx: {
+			parent: "#container"
+		},
+		build: function(ctx){
+			var id = "";
+			if(ctx.data && ctx.data.id){
+				id = ctx.data.id;
+			}
+			var tag = snow.dm.get("tag",id);
+			var $e = $("#tagFormTmpl").tmpl(tag);
+			return $e;
+		},
+		postDisplay:function(ctx){
+			$(".dialog-header").delegate("button","click",function(){
+			   $(this).sComponent$element().sCall("close");		
+			});
+			var $element = ctx.$element;
+			$element.find(".save").click(function(){
+				var tag = {};
+				tag.name = $("#updateTag").find("input[name='name']").val();
+				tag.id = $("#updateTag").find("input[name='id']").val();
+				snow.dm.save("tag",tag);
+				snow.ui.display("welcome");
+			});
+		},
+		methods: {
+			close: function(){
+				var $element = this;
+				$element.remove();
+			}
+		}
+	});
+</script>
+
+<!-- templates-->
+<script id="tagFormTmpl" type="text/html">
+	<div class="dialog">
+		<div class="dialog-header">
+			<button class="ok">X</button>
+			<h1 class="appText">Update Tag</h1>
+		</div>
+		<div class="dialog-content">
+			<form id="updateTag">
+					<input name="id" type="hidden" value="${id}" />
+					<div class="dialogItem">
+						<div class="dialogItem-label">Name:</div>
+						<div class="dialogItem-value">
+							<input name="name" type="text" value="${name}" />
+						</div>
+					</div>
+
+					<div class="action">
+							<button class="save" >save</button>
+					</div>
+			</form>
+		</div>
+	</div>
+</script>
+<!-- /templates -->

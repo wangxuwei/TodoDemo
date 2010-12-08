@@ -1,0 +1,89 @@
+
+<script type="text/javascript">
+	
+	
+snow.ui.registerComponent("dialogTagTodo",{
+		ctx: {
+			parent: "#container"
+			},
+		build: function(ctx){
+			var todoId = ctx.data.todoId;
+			var todo = snow.dm.get("todo",todoId);
+			var tags = snow.dm.find("tag",{});
+			todo.tagsList = tags;
+			var $UL = null;
+			$UL = $("#tagTodoFormTmpl").tmpl(todo);
+			return $UL;
+		},
+		postDisplay:function(ctx){
+			$(".dialog-header").delegate("button","click",function(){
+			   $(this).sComponent$element().sCall("close");		
+			});
+			var $element = ctx.$element;
+			$element.find(".save").click(function(){
+				var tagTodos = snow.dm.find("tagtodo",{});
+				var todoId = $("#updateTagTodo").find("input[name='todoId']").val();
+				for(var i=0;i<tagTodos.length;i++){
+					var o = tagTodos[i];
+					if(todoId == o.todoId){
+						snow.dm.remove("tagtodo",o.id);
+					}
+				}
+				
+				$("#updateTagTodo").find("input[name='tagIds']:checked").each(function(){
+					var tagTodo = {};
+					tagTodo.todoId=todoId;
+					tagTodo.tagId = $(this).val();
+					snow.dm.save("tagtodo",tagTodo);
+				});
+				snow.ui.display("todo");
+			});
+		},
+		methods: {
+			close: function(){
+				var $element = this;
+				$element.remove();
+			}
+		}
+	});
+
+function getChecked(tagId){
+	var tags = this.data.tags;
+	for(var i=0; i<tags.length;i++){
+		if(tagId == tags[i].id){
+			return "checked";
+		}
+	}
+	return "";
+}
+</script>
+
+
+<script id="tagTodoFormTmpl" type="text/html">
+	<div class="dialog">
+		<div class="dialog-header">
+			<button class="ok">X</button>
+			<h1 class="appText">Select Tags</h1>
+		</div>
+		<div class="dialog-content">
+			<h3 style="text-align:center">TODO Name:${taskName}</h3>
+			<br/>
+			<form id="updateTagTodo" >
+			<input type="hidden" name="todoId" value="${id}">
+			<div class="dialogItem">
+				<div class="dialogItem-label">Tags:</div>
+				<div class="dialogItem-value">
+					{{each tagsList}}
+						<input type="checkbox" name="tagIds" ${getChecked(id)} value="${id}" >${name} <br/>
+					{{/each tagsList}}
+				</div>
+			</div>
+
+				<div class="action">
+					<button class="save" >save</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</script>
+

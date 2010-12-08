@@ -1,0 +1,110 @@
+
+<script type="text/javascript">
+	
+	
+	snow.ui.registerComponent("todo",{
+		ctx: {
+			parent: "#todoContainer",
+			emptyParent: true
+			},
+		build: function(ctx){
+			var todos = snow.dm.find("todo",{});
+			if(ctx.data && ctx.data.tagId){
+				var tagTodos = snow.dm.find("tagtodo",{});
+				var a = [];
+				for(var i = 0; i<tagTodos.length;i++){
+					if(tagTodos[i].tagId == ctx.data.tagId){
+						a.push(tagTodos[i]);
+					}
+				}
+				var b =[];
+				for(var i=0; i<a.length;i++){
+					for(var j = 0; j<todos.length;j++){
+						if(a[i].todoId == todos[j].id){
+							b.push(todos[j]);
+						}
+					}
+				}
+				todos = b;
+			}
+
+			var $UL = null;
+			$UL = $("#todoULTmpl").tmpl({"todos":todos});
+			
+			return $UL;
+		},
+		postDisplay: function(ctx){
+			var $element = ctx.$element;
+			$element.find(".add").click(function(){
+				snow.ui.display('dialogTodo',{});
+			});
+
+			$element.find(".edit").click(function(){
+				var $item  = $(this).closest("*[data-obj_id]");
+				var id = $item.attr("data-obj_id");
+				snow.ui.display('dialogTodo',{data:{id:id}});
+			});
+
+			$element.find(".deleteTag").click(function(){
+				var $item  = $(this).closest("*[data-obj_id]");
+				var id = $item.attr("data-obj_id");
+				snow.dm.remove("tagtodo",id);
+				snow.ui.display("todo");
+			});
+
+			$element.find(".addTag").click(function(){
+				var $item  = $(this).closest("*[data-obj_id]");
+				var id = $item.attr("data-obj_id");
+				snow.ui.display('dialogTagTodo',{data:{todoId:id}});
+			});
+
+			$element.find(".delete").click(function(){
+				var $item  = $(this).closest("*[data-obj_id]");
+				var id = $item.attr("data-obj_id");
+				snow.dm.remove("todo",id);
+				var tagTodos = snow.dm.find("tagtodo",{});
+				for(var i=0;i<tagTodos.length;i++){
+					var o = tagTodos[i];
+					if(id == o.todoId){
+						snow.dm.remove("tagtodo",o.id);
+					}
+				}
+				snow.ui.display("todo");
+			});
+		}
+	});
+</script>
+
+<!-- templates-->
+<script id="todoULTmpl" type="text/html">
+
+	<div class="panel">
+		<div class="panel-header">
+			<button class="action add">Add Todo</button>
+			<h1>Todos</h1>
+		</div>
+		<div class="panel-content todoContent">
+			{{each todos}}
+				<div class="todo" data-obj_name="${taskName}" data-obj_id="${id}">
+				  <div class="todoInfo">
+					  <div> 
+						  <span class="text">Task Name: </span><span class="title edit" ><a>${taskName}</a></span>
+						  <span > (${status})</span> 
+					  </div> 
+					  <div > 
+						  <span class="text">Start Date: </span> <span class="value">${startDate}</span> 
+						 <span class="text">End Date: </span> <span class="value">${endDate}</span> 
+					  </div> 
+					  <div> 
+						<span class="text">Tags: </span> 
+						{{each tags}}<span class="value tag deleteTag" data-obj_id="${tagTodoId}">${name}</span> {{/each tags}} 
+						<span class="addTag"><a>Add Tags</a></span>
+					  </div>	
+				  </div>
+				  <div class="todoAction delete"><a>X</a></div>	
+				</div>
+			{{/each todos}}
+		</div>
+	</div>
+</script>
+<!-- /templates -->

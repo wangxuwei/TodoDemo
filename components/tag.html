@@ -1,0 +1,72 @@
+
+<script type="text/javascript">
+	
+	
+	snow.ui.registerComponent("tag",{
+		ctx: {
+			parent: "#tagContainer",
+			emptyParent: true
+			},
+		build: function(ctx){
+			var tags = snow.dm.find("tag",{});
+			var $UL = null;
+			$UL = $("#tagULTmpl").tmpl({"tags":tags});
+			return $UL;
+		},
+		postDisplay: function(ctx){
+			var $element = ctx.$element;
+			$element.find(".delete").click(function(){
+				var $item  = $(this).closest("*[data-obj_id]");
+				var id = $item.attr("data-obj_id");
+				snow.dm.remove("tag",id);
+	
+				var tagTodos = snow.dm.find("tagtodo",{});
+				for(var i=0;i<tagTodos.length;i++){
+					var o = tagTodos[i];
+					if(id == o.tagId){
+						snow.dm.remove("tagtodo",o.id);
+					}
+				}
+				snow.ui.display("welcome");
+			});
+
+			$element.find(".edit").click(function(){
+				var $item  = $(this).closest("*[data-obj_id]");
+				var id = $item.attr("data-obj_id");
+				snow.ui.display('dialogTag',{data:{id:id}})
+			});
+
+			
+			$element.find(".add").click(function(){
+				snow.ui.display('dialogTag',{});
+			});
+
+			$element.find(".filterTodo").click(function(){
+				var $item  = $(this).closest("*[data-obj_id]");
+				var id = $item.attr("data-obj_id");
+				snow.ui.display('todo',{data:{tagId:id}})
+			});
+		}
+	});
+</script>
+
+<!-- templates-->
+<script id="tagULTmpl" type="text/html">
+	<div class="panel">
+		<div class="panel-header">
+			<button class="action add">Add Tag</button>
+			<h1>Tags</h1>
+		</div>
+		<div class="panel-content">
+			{{each tags}}
+				<div style="height:30px" data-obj_id="${id}">
+				  <div class="tagName"> 
+					 <span class="action filterTodo" ><a>${name}</a></span>
+				  </div>	
+				  <div class="tagAction"><span class="edit" ><a>Edit</a></span>&nbsp;<span class="pointer blueText delete"><a>Del</a></span></div>	
+				</div>
+			{{/each tags}}
+		</div>
+	</div>
+</script>
+<!-- /templates -->
